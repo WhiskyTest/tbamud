@@ -26,6 +26,7 @@
 #include "modify.h"
 #include "quest.h"
 #include "ibt.h"
+#include "screen.h"
 
 /* local (file scope) function prototpyes  */
 static char *next_page(char *str, struct char_data *ch);
@@ -531,7 +532,12 @@ void show_string(struct descriptor_data *d, char *input)
    * then free up the space we used. Also send a \tn - to make color stop
    * bleeding. - Welcor */
   if (d->showstr_page + 1 >= d->showstr_count) {
-    send_to_char(d->character, "%s\tn", d->showstr_vector[d->showstr_page]);
+
+    /* Only append \tn when color is enabled to avoid ANSI leakage */
+    send_to_char(d->character, "%s%s",
+             d->showstr_vector[d->showstr_page],
+             COLOR_LEV(d->character) >= C_NRM ? "\tn" : "");
+
     free(d->showstr_vector);
     d->showstr_vector = NULL;
     d->showstr_count = 0;
